@@ -16,7 +16,7 @@ To install manually, download this repository, run `setup_windows.bat` once, the
 
 ## Deploy the landing page to Vercel
 
-The standalone landing page is in `site/`, which contains only static website files so Vercel will not detect the Python transcription app. In Vercel, import this GitHub repository and set the **Root Directory** to `site`. Vercel should detect **Other** as the Framework Preset; leave the Build Command blank and deploy the folder as-is. The **USE THE TOOL** button copies the Windows installer command and explains how to run it in Command Prompt. The matching microphone favicon is `site/favicon.svg`.
+The landing page and matching microphone favicon are in `public/`. The root `vercel.json` forces the **Other** framework preset, disables the build step, and serves only the static files in `public/`, so Vercel does not run the Python transcription app. Import the repository with the Root Directory set to `./` (the repository root); no subfolder selection is needed. The **USE THE TOOL** button copies the Windows installer command and explains how to run it in Command Prompt.
 
 ## Use the app
 
