@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f8fa">
+  <meta name="description" content="Transcribe YouTube videos and audio locally with TagalogTube Transcriber.">
+  <title>TagalogTube Transcriber</title>
+  <style>
+    :root{color-scheme:light;--ink:#14221e;--muted:#61716a;--line:#dce5df;--paper:#f7f8f5;--green:#baf36a;--deep:#17372c;--soft:#eaf1e8}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+    button{font:inherit}
+    .wrap{max-width:1120px;margin:auto;padding:26px 28px 60px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .brand{display:flex;align-items:center;gap:11px;font-size:15px;font-weight:750;letter-spacing:-.025em}
+    .brand-mark{display:grid;place-items:center;width:39px;height:39px;border-radius:13px;background:var(--deep);color:var(--green)}
+    .brand-mark svg{width:21px;height:21px}
+    .local-pill{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:8px 12px;color:#43564c;font-size:12px;font-weight:700;letter-spacing:.07em}
+    .local-pill:before{content:"";width:7px;height:7px;border-radius:50%;background:#70b743;box-shadow:0 0 0 3px #70b74322}
+    main{padding-top:67px}
+    .hero{display:grid;grid-template-columns:1.08fr .92fr;gap:48px;align-items:center}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;color:#466348;background:#e9f2df;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:750;letter-spacing:.045em;text-transform:uppercase}
+    h1{max-width:620px;margin:21px 0 18px;font-size:clamp(42px,6vw,70px);line-height:.99;letter-spacing:-.065em;font-weight:760}
+    h1 span{color:#628d37}
+    .lead{max-width:525px;margin:0;color:#596960;font-size:17px;line-height:1.75}
+    .cta{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:54px;margin-top:29px;padding:0 22px;border:0;border-radius:13px;background:var(--deep);color:white;font-size:14px;font-weight:800;letter-spacing:.035em;cursor:pointer;transition:transform .18s ease,background .18s ease,box-shadow .18s ease;box-shadow:0 8px 20px #17372c20}
+    .cta:hover{transform:translateY(-2px);background:#24513e;box-shadow:0 12px 26px #17372c2b}
+    .cta:focus-visible{outline:3px solid #78a944;outline-offset:3px}
+    .cta svg{width:17px;height:17px}
+    .microcopy{margin:12px 0 0;color:#78857e;font-size:12px}
+    .install-steps{display:none;max-width:490px;margin-top:22px;padding:17px 19px;border:1px solid #cbdcbd;border-radius:14px;background:#eef6e8;color:#304b30}
+    .install-steps.visible{display:block;animation:arrive .2s ease-out}
+    .install-steps strong{display:block;margin-bottom:8px;font-size:14px}
+    .install-steps ol{margin:0;padding-left:21px;font-size:13px;line-height:1.8}
+    .install-steps code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px}
+    #copy-status{min-height:20px;margin:8px 0 0;color:#496d35;font-size:12px;font-weight:650}
+    .fallback{display:none;max-width:100%;overflow-wrap:anywhere;padding:8px;border-radius:8px;background:white;font-size:11px}
+    .preview{position:relative;min-height:360px;padding:24px;border:1px solid #e0e5df;border-radius:22px;background:#fff;box-shadow:0 24px 70px #233c2e12}
+    .preview:before{position:absolute;z-index:-1;content:"";width:240px;height:240px;right:-25px;top:-30px;border-radius:50%;background:#e9f3d9}
+    .window-top{display:flex;align-items:center;gap:6px;padding-bottom:18px;border-bottom:1px solid #edf0ec}
+    .dot{width:8px;height:8px;border-radius:50%;background:#d4dbd4}
+    .window-title{margin-left:7px;color:#87928b;font-size:11px}
+    .preview-label{margin-top:24px;color:#597060;font-size:11px;font-weight:750;letter-spacing:.09em;text-transform:uppercase}
+    .preview-input{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:9px;padding:13px 14px;border:1px solid #e2e9e1;border-radius:10px;color:#64736a;font-size:12px}
+    .preview-input b{color:#315d3d;font-weight:650}
+    .preview-button{margin-top:12px;padding:11px 14px;border-radius:9px;background:var(--deep);color:white;font-size:12px;font-weight:700;text-align:center}
+    .progress-label{display:flex;justify-content:space-between;margin-top:24px;color:#54675c;font-size:11px;font-weight:650}
+    .progress{height:7px;margin-top:9px;overflow:hidden;border-radius:999px;background:#edf1eb}
+    .progress span{display:block;width:68%;height:100%;border-radius:inherit;background:#8cc34f}
+    .chunk-row{display:flex;align-items:center;justify-content:space-between;margin-top:15px;padding:12px;border-radius:10px;background:#f6f8f4;color:#53665a;font-size:11px}
+    .chunk-row strong{color:#294834}
+    .features{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:71px}
+    .feature{padding:19px 20px;border:1px solid var(--line);border-radius:15px;background:#ffffff9c}
+    .feature-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--soft);color:#416d3e}
+    .feature-icon svg{width:18px;height:18px}
+    .feature h2{margin:13px 0 5px;font-size:14px;letter-spacing:-.02em}
+    .feature p{margin:0;color:var(--muted);font-size:12px;line-height:1.65}
+    footer{display:flex;justify-content:space-between;gap:16px;margin-top:42px;padding-top:19px;border-top:1px solid var(--line);color:#7a867e;font-size:11px}
+    footer a{color:#53694f;text-decoration:none}
+    footer a:hover{text-decoration:underline}
+    @keyframes arrive{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:760px){.wrap{padding:20px 19px 40px}main{padding-top:48px}.hero{grid-template-columns:1fr;gap:35px}h1{font-size:clamp(43px,12vw,62px)}.preview{min-height:330px}.features{grid-template-columns:1fr;margin-top:42px}.feature{display:grid;grid-template-columns:38px 1fr;column-gap:10px;padding:15px}.feature-icon{grid-row:span 2}.feature h2{margin:0 0 3px}.feature p{grid-column:2}footer{flex-direction:column}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3m-4 0h8"/></svg></span>
+        <span>TagalogTube Transcriber</span>
+      </div>
+      <div class="local-pill">LOCAL TRANSCRIPTION</div>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <div class="eyebrow"><span aria-hidden="true">✳</span> Filipino · Tagalog · Taglish</div>
+          <h1 id="hero-title">Turn video into words<span>.</span></h1>
+          <p class="lead">Transcribe YouTube videos and audio files right on your Windows computer. Your media stays local while Whisper turns speech into a transcript.</p>
+          <button class="cta" id="use-tool" type="button">
+            USE THE TOOL
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h11m-4-4 4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <p class="microcopy">Copies the Windows installer command. No signup or API key.</p>
+          <section class="install-steps" id="install-steps" aria-live="polite" aria-labelledby="steps-title">
+            <strong id="steps-title">Command copied. Open Command Prompt to continue:</strong>
+            <ol>
+              <li>Open <b>Command Prompt</b> (press Start, type <code>cmd</code>, then press Enter).</li>
+              <li>Paste the copied command and press Enter.</li>
+              <li>Wait for setup to finish. TagalogTube will open in your browser.</li>
+            </ol>
+            <p id="copy-status">The command is ready to paste.</p>
+            <code class="fallback" id="command-fallback"></code>
+          </section>
+        </div>
+
+        <div class="preview" aria-label="Preview of the TagalogTube transcription app">
+          <div class="window-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">TagalogTube · local app</span></div>
+          <div class="preview-label">YouTube video</div>
+          <div class="preview-input"><b>https://youtube.com/watch?v=…</b><span aria-hidden="true">↗</span></div>
+          <div class="preview-button">Transcribe YouTube video</div>
+          <div class="progress-label"><span>Transcribing audio</span><span>Chunk 4 of 8</span></div>
+          <div class="progress"><span></span></div>
+          <div class="chunk-row"><span>Audio processed</span><strong>18:42 / 40:00</strong></div>
+        </div>
+      </section>
+
+      <section class="features" aria-label="App features">
+        <article class="feature">
+          <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18m4-14v10M8 8v8M4 10v4m16-4v4"/></svg></span>
+          <h2>Made for Filipino speech</h2>
+          <p>Choose Filipino/Tagalog, English, or let the model detect the language.</p>
+        </article>
+        <article class="feature">
+          <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 9h8M8 12h8M8 15h5"/></svg></span>
+          <h2>Transcript files, ready</h2>
+          <p>Save as TXT, or enable SRT and VTT subtitle files.</p>
+        </article>
+        <article class="feature">
+          <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 2.8 7.8 7 10 4.2-2.2 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <h2>Runs on your PC</h2>
+          <p>Local speech recognition. No cloud transcription API or account needed.</p>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <span>TagalogTube Transcriber · Free local Windows app</span>
+      <a href="https://github.com/iantolentino/Tagalogtube-Transcribe" target="_blank" rel="noreferrer">Source and setup guide</a>
+    </footer>
+  </div>
+  <script>
+    const command = 'curl.exe -fsSL https://raw.githubusercontent.com/iantolentino/Tagalogtube-Transcribe/main/install.ps1 -o "%TEMP%\\tagalogtube-install.ps1" && powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%TEMP%\\tagalogtube-install.ps1"';
+    const button = document.getElementById('use-tool');
+    const steps = document.getElementById('install-steps');
+    const status = document.getElementById('copy-status');
+    const fallback = document.getElementById('command-fallback');
+
+    button.addEventListener('click', async () => {
+      steps.classList.add('visible');
+      try {
+        await navigator.clipboard.writeText(command);
+        status.textContent = 'The command is copied. Paste it into Command Prompt and press Enter.';
+      } catch {
+        fallback.textContent = command;
+        fallback.style.display = 'block';
+        status.textContent = 'Automatic copy was blocked. Copy the command shown below and paste it into Command Prompt.';
+      }
+      steps.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+</body>
+</html>

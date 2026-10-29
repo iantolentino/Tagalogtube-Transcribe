@@ -4,15 +4,19 @@ A free, local Windows app for transcribing YouTube videos and audio/video files.
 
 ## Quick install on Windows
 
-Open **PowerShell** and paste this command:
+Open **Command Prompt** and paste this command:
 
 ```powershell
-curl.exe -fsSL https://raw.githubusercontent.com/iantolentino/Tagalogtube-Transcribe/main/install.ps1 | powershell.exe -NoProfile -ExecutionPolicy Bypass -Command -
+curl.exe -fsSL https://raw.githubusercontent.com/iantolentino/Tagalogtube-Transcribe/main/install.ps1 -o "%TEMP%\tagalogtube-install.ps1" && powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%TEMP%\tagalogtube-install.ps1"
 ```
 
-The installer downloads the app into `%USERPROFILE%\Tagalogtube-Transcribe`, sets up Python dependencies and FFmpeg when needed, then launches the app in your browser at <http://localhost:8501>. Keep the terminal window open while using the app. The first setup and first model download can take a while.
+The installer downloads the app into `%USERPROFILE%\Tagalogtube-Transcribe`, sets up Python dependencies and FFmpeg when needed, then launches the app in your browser at <http://localhost:8501>. Keep the terminal window open while using the app. The first setup and first model download can take a while. The landing page's **USE THE TOOL** button copies this same command.
 
 To install manually, download this repository, run `setup_windows.bat` once, then run `run_windows.bat`.
+
+## Deploy the landing page to Vercel
+
+This repository includes a standalone `index.html`; it does not need a framework or build step. In Vercel, import this GitHub repository and select **Other** as the Framework Preset. Leave the Build Command blank and use the repository root (`.`) as the Output Directory, then deploy. Vercel serves the static landing page; the **USE THE TOOL** button copies the Windows installer command and explains how to run it in Command Prompt.
 
 ## Use the app
 
