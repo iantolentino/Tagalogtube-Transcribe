@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment (recreate with setup_windows.bat)
+venv/
+
+# Downloaded Whisper models (large; re-downloaded automatically)
+models/
+
+# Transcripts are personal output; keep the folder, ignore the files
+transcripts/*
+!transcripts/.gitkeep
+
+# Temporary and OS files
+*.tmp
+.DS_Store
+Thumbs.db
