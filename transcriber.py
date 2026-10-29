@@ -6,8 +6,8 @@ from Hugging Face on first use and cached in the project's models/ folder.
 
 from __future__ import annotations
 
-import re
 import os
+import re
 import shutil
 import unicodedata
 from dataclasses import dataclass, field
@@ -99,11 +99,10 @@ def decode_audio_with_ffmpeg(audio_path, start=0.0, duration=None):
 
     import numpy as np
 
-    ffmpeg = shutil.which("ffmpeg") or _find_winget_ffmpeg()
+    ffmpeg = shutil.which("ffmpeg") or _find_bundled_ffmpeg() or _find_winget_ffmpeg()
     if not ffmpeg:
         raise TranscriptionError(
-            "FFmpeg was not found. Install it (winget install --id Gyan.FFmpeg -e), "
-            "reopen this window, then try again."
+            "FFmpeg is unavailable. Run setup_windows.bat to install the app's bundled FFmpeg, then try again."
         )
     args = [ffmpeg, "-nostdin", "-v", "error", "-i", str(audio_path), "-ss", str(start)]
     if duration is not None:
@@ -118,6 +117,17 @@ def decode_audio_with_ffmpeg(audio_path, start=0.0, duration=None):
         err = proc.stderr.decode("utf-8", errors="replace").strip()
         raise TranscriptionError(f"FFmpeg could not read this file. Details: {err or 'no audio found'}")
     return np.frombuffer(proc.stdout, dtype=np.int16).astype(np.float32) / 32768.0
+
+
+def _find_bundled_ffmpeg():
+    """Use the executable included with the imageio-ffmpeg wheel."""
+    try:
+        import imageio_ffmpeg
+
+        executable = imageio_ffmpeg.get_ffmpeg_exe()
+    except (ImportError, OSError, RuntimeError):
+        return None
+    return executable if Path(executable).is_file() else None
 
 
 def _find_winget_ffmpeg():

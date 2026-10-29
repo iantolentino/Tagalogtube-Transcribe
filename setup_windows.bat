@@ -79,6 +79,8 @@ if not exist "%VENV_PY%" (
     set "NEED_INSTALL=1"
 )
 if not exist "%VENV_DIR%\.deps_installed" set "NEED_INSTALL=1"
+"%VENV_PY%" -c "import imageio_ffmpeg" >nul 2>&1
+if errorlevel 1 set "NEED_INSTALL=1"
 if /i "%~1"=="--reinstall" set "NEED_INSTALL=1"
 
 REM ---- 3. Install dependencies only when needed (no reinstall on every launch) ----
@@ -111,7 +113,7 @@ echo installed> "%VENV_DIR%\.deps_installed"
 
 :verify
 REM ---- 4. Verify the packages can be imported ----
-"%VENV_PY%" -c "import streamlit, faster_whisper, yt_dlp" >nul 2>&1
+"%VENV_PY%" -c "import streamlit, faster_whisper, yt_dlp, imageio_ffmpeg" >nul 2>&1
 if errorlevel 1 (
     echo [ERROR] Some required packages could not be loaded.
     echo         Open Command Prompt in this folder and run: setup_windows.bat --reinstall
@@ -120,62 +122,16 @@ if errorlevel 1 (
 )
 echo All Python packages are ready.
 
-REM ---- 5. Update yt-dlp and install FFmpeg if missing ----
+REM ---- 5. Verify bundled FFmpeg and update yt-dlp ----
 "%VENV_PY%" -m pip install -U yt-dlp
-call :ensure_tool ffmpeg Gyan.FFmpeg "FFmpeg"
-if errorlevel 1 exit /b 1
+"%VENV_PY%" -c "import imageio_ffmpeg, subprocess; subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), '-version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)"
+if errorlevel 1 (
+    echo [ERROR] The bundled FFmpeg could not run. Check the Python package install output above.
+    if "%AUTOMATED%"=="0" pause
+    exit /b 1
+)
+echo Bundled FFmpeg is installed and working.
 goto :folders
-
-:ensure_tool
-REM %~1 = command name, %~2 = winget package id, %~3 = display name
-call :add_winget_ffmpeg_path
-where %~1 >nul 2>&1
-if not errorlevel 1 (
-    %~1 -version >nul 2>&1
-    if not errorlevel 1 (
-        echo %~3 found and working.
-        goto :eof
-    )
-    echo [WARNING] %~3 was found on PATH but did not run. Trying a user-scope reinstall...
-)
-where winget >nul 2>&1
-if errorlevel 1 (
-    echo [ERROR] WinGet is not available, so %~3 could not be installed automatically.
-    echo   Install WinGet from Microsoft Store or install FFmpeg manually, then retry setup.
-    if "%AUTOMATED%"=="0" pause
-    exit /b 1
-)
-echo Installing %~3 for this Windows user with winget. Administrator access should not be needed...
-winget install --id %~2 -e --scope user --source winget --silent --accept-package-agreements --accept-source-agreements
-call :add_winget_ffmpeg_path
-where %~1 >nul 2>&1
-if errorlevel 1 (
-    echo [ERROR] %~3 is still unavailable after installation.
-    echo   Check the winget messages above, then rerun setup_windows.bat.
-    if "%AUTOMATED%"=="0" pause
-    exit /b 1
-)
-%~1 -version >nul 2>&1
-if errorlevel 1 (
-    echo [ERROR] %~3 was found but could not run. Check the winget output and retry setup.
-    if "%AUTOMATED%"=="0" pause
-    exit /b 1
-)
-echo %~3 installed and verified.
-goto :eof
-
-:add_winget_ffmpeg_path
-for /d %%D in ("%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg_*") do (
-    for /d %%B in ("%%~D\ffmpeg-*-full_build\bin") do (
-        if exist "%%~B\ffmpeg.exe" set "PATH=%%~B;%PATH%"
-    )
-)
-for /d %%D in ("%ProgramFiles%\WinGet\Packages\Gyan.FFmpeg_*") do (
-    for /d %%B in ("%%~D\ffmpeg-*-full_build\bin") do (
-        if exist "%%~B\ffmpeg.exe" set "PATH=%%~B;%PATH%"
-    )
-)
-goto :eof
 
 :folders
 if not exist "%~dp0transcripts" mkdir "%~dp0transcripts"

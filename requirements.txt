@@ -2,4 +2,4 @@ streamlit>=1.37,<2
 faster-whisper>=1.0.3
 av>=13.0
 yt-dlp>=2024.8.6
- 
+imageio-ffmpeg>=0.5,<1

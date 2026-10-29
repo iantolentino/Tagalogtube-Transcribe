@@ -10,7 +10,7 @@ Open **Command Prompt** and paste this command:
 curl.exe -fsSL https://raw.githubusercontent.com/iantolentino/Tagalogtube-Transcribe/main/install.ps1 -o "%TEMP%\tagalogtube-install.ps1" && powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%TEMP%\tagalogtube-install.ps1"
 ```
 
-The installer downloads the app into `%USERPROFILE%\Tagalogtube-Transcribe`, installs Python and FFmpeg from the WinGet source for the current Windows user when needed, verifies that FFmpeg runs, sets up Python dependencies, waits for the local server, and then opens <http://localhost:8501> in your browser. Administrator access is not normally required. Keep the terminal window open while using the app. The first setup and first model download can take a while. The landing page's **USE THE TOOL** button copies this same command.
+The installer downloads the app into `%USERPROFILE%\Tagalogtube-Transcribe`, installs Python for the current Windows user with WinGet if needed, installs the app's dependencies (including a bundled FFmpeg executable), waits for the local server, and then opens <http://localhost:8501> in your browser. FFmpeg does not require WinGet or a system PATH change. Administrator access is not normally required. Keep the terminal window open while using the app. The first setup and first model download can take a while. The landing page's **USE THE TOOL** button copies this same command.
 
 To install manually, download this repository, run `setup_windows.bat` once, then run `run_windows.bat`.
 
@@ -46,7 +46,7 @@ The local transcription path decodes audio in five-minute chunks, uses a small o
 
 - Windows 10 or later
 - Python 3.9 or newer (Python 3.11 or 3.12 recommended)
-- FFmpeg (the setup script attempts to install it with `winget` if missing)
+- FFmpeg (bundled with the `imageio-ffmpeg` Python package)
 - Internet access for initial dependency/model downloads and YouTube processing
 
 ## Troubleshooting
@@ -54,7 +54,7 @@ The local transcription path decodes audio in five-minute chunks, uses a small o
 | Issue | What to try |
 |---|---|
 | Setup says Python is missing | Install Python and enable **Add Python to PATH**, then run setup again. |
-| FFmpeg is missing | Install FFmpeg with `winget install --id Gyan.FFmpeg -e`, reopen PowerShell, and restart the app. |
+| FFmpeg is missing | Run `setup_windows.bat` again. It installs and verifies the bundled FFmpeg dependency without WinGet. |
 | YouTube returns HTTP 429 | YouTube is rate-limiting requests. Wait before retrying, or disable caption lookup and use local audio transcription. |
 | GPU error mentions `cublas64_12.dll` | The app retries on CPU. This works more slowly; choose tiny or base for speed. |
 | Transcription appears slow | Check the displayed stage and chunk progress. Long videos on CPU may take a long time even with tiny. |
