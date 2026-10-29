@@ -28,10 +28,12 @@ try {
     }
 
     Write-Host "App files installed in $installDir"
-    Write-Host 'Setting up Python packages and FFmpeg. Follow any prompts in the setup window.'
-    & (Join-Path $installDir 'setup_windows.bat')
-    if ($LASTEXITCODE -ne 0) {
-        throw 'Setup did not complete. Follow the setup instructions above, then run setup_windows.bat again.'
+    Write-Host 'Setting up Python packages and FFmpeg. This may take several minutes.'
+    $setupPath = Join-Path $installDir 'setup_windows.bat'
+    $setupCommand = '""{0}" --install"' -f $setupPath
+    $setupProcess = Start-Process -FilePath $env:ComSpec -ArgumentList "/d /s /c $setupCommand" -Wait -PassThru -NoNewWindow
+    if ($setupProcess.ExitCode -ne 0) {
+        throw "Setup failed with exit code $($setupProcess.ExitCode). Check the setup output above. To retry manually, open Command Prompt and run: `"$setupPath`" --install"
     }
 
     Write-Host 'Launching TagalogTube Transcriber...'
@@ -39,6 +41,6 @@ try {
 }
 finally {
     if (Test-Path -LiteralPath $workDir) {
-        Remove-Item -LiteralPath $workDir -Recurse -Force
+        Remove-Item -LiteralPath $workDir -Recurse -Force -ErrorAction SilentlyContinue
     }
 }

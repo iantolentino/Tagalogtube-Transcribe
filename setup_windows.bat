@@ -6,6 +6,8 @@ set "VENV_DIR=%~dp0venv"
 set "VENV_PY=%VENV_DIR%\Scripts\python.exe"
 set "NEED_INSTALL=0"
 set "PY_CMD="
+set "AUTOMATED=0"
+if /i "%~1"=="--install" set "AUTOMATED=1"
 
 echo ==================================================
 echo   TagalogTube Transcriber - First-time setup
@@ -31,6 +33,18 @@ if errorlevel 1 goto :python_manual
 echo Installing Python 3.12 with winget. This may take a few minutes...
 winget install --id Python.Python.3.12 -e --silent --accept-package-agreements --accept-source-agreements
 echo.
+REM Refresh PATH for this process so a just-installed Python can be used now.
+set "PATH=%LocalAppData%\Programs\Python\Python312;%LocalAppData%\Programs\Python\Python312\Scripts;%PATH%"
+python -c "import sys; sys.exit(0 if sys.version_info >= (3, 9) else 1)" >nul 2>&1
+if not errorlevel 1 (
+    set "PY_CMD=python"
+    goto :check_venv
+)
+if "%AUTOMATED%"=="1" (
+    echo [ERROR] Python installation finished, but Python 3.9+ was not found on PATH.
+    echo Install Python from https://www.python.org/downloads/windows/ and rerun the installer.
+    exit /b 1
+)
 echo Python was installed. Close this window and double-click setup_windows.bat again.
 echo.
 pause
@@ -59,7 +73,7 @@ if not exist "%VENV_PY%" (
     %PY_CMD% -m venv "%VENV_DIR%"
     if errorlevel 1 (
         echo [ERROR] Could not create the virtual environment.
-        pause
+        if "%AUTOMATED%"=="0" pause
         exit /b 1
     )
     set "NEED_INSTALL=1"
@@ -82,14 +96,14 @@ if errorlevel 1 (
     echo.
     echo [ERROR] Dependency installation failed. Check your internet connection and the messages above,
     echo         then double-click setup_windows.bat again.
-    pause
+    if "%AUTOMATED%"=="0" pause
     exit /b 1
 )
 echo Making sure PyAV (av) is up to date...
 "%VENV_PY%" -m pip install -U "av>=13.0"
 if errorlevel 1 (
     echo [ERROR] Could not upgrade PyAV. Check your internet connection and run setup again.
-    pause
+    if "%AUTOMATED%"=="0" pause
     exit /b 1
 )
 del /q "%VENV_DIR%\.deps_installed" >nul 2>&1
@@ -101,15 +115,14 @@ REM ---- 4. Verify the packages can be imported ----
 if errorlevel 1 (
     echo [ERROR] Some required packages could not be loaded.
     echo         Open Command Prompt in this folder and run: setup_windows.bat --reinstall
-    pause
+    if "%AUTOMATED%"=="0" pause
     exit /b 1
 )
 echo All Python packages are ready.
 
-REM ---- 5. Update yt-dlp and install FFmpeg and Node.js if missing ----
+REM ---- 5. Update yt-dlp and install FFmpeg if missing ----
 "%VENV_PY%" -m pip install -U yt-dlp
 call :ensure_tool ffmpeg Gyan.FFmpeg "FFmpeg"
-call :ensure_tool node OpenJS.NodeJS.LTS "Node.js"
 goto :folders
 
 :ensure_tool
@@ -147,4 +160,5 @@ echo   Launch the app by double-clicking run_windows.bat
 echo   The Whisper model downloads on your first transcription.
 echo ==================================================
 echo.
-pause
+    if "%AUTOMATED%"=="0" pause
+exit /b 0
