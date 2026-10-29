@@ -123,6 +123,7 @@ echo All Python packages are ready.
 REM ---- 5. Update yt-dlp and install FFmpeg if missing ----
 "%VENV_PY%" -m pip install -U yt-dlp
 call :ensure_tool ffmpeg Gyan.FFmpeg "FFmpeg"
+if errorlevel 1 exit /b 1
 goto :folders
 
 :ensure_tool
@@ -140,12 +141,28 @@ if errorlevel 1 (
 )
 echo %~3 was not found. Installing it with winget. Windows may ask for permission...
 winget install --id %~2 -e --silent --accept-package-agreements --accept-source-agreements
+call :add_winget_ffmpeg_path
 where %~1 >nul 2>&1
 if errorlevel 1 (
-    echo [WARNING] %~3 was installed, but this window cannot see it yet.
-    echo   Close this window, then run setup_windows.bat again.
+    echo [ERROR] %~3 is still unavailable after installation.
+    echo   Check the winget messages above, then rerun setup_windows.bat.
+    if "%AUTOMATED%"=="0" pause
+    exit /b 1
 ) else (
     echo %~3 installed.
+)
+goto :eof
+
+:add_winget_ffmpeg_path
+for /d %%D in ("%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg_*") do (
+    for /d %%B in ("%%~D\ffmpeg-*-full_build\bin") do (
+        if exist "%%~B\ffmpeg.exe" set "PATH=%%~B;%PATH%"
+    )
+)
+for /d %%D in ("%ProgramFiles%\WinGet\Packages\Gyan.FFmpeg_*") do (
+    for /d %%B in ("%%~D\ffmpeg-*-full_build\bin") do (
+        if exist "%%~B\ffmpeg.exe" set "PATH=%%~B;%PATH%"
+    )
 )
 goto :eof
 

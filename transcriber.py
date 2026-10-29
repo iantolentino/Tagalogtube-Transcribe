@@ -7,6 +7,8 @@ from Hugging Face on first use and cached in the project's models/ folder.
 from __future__ import annotations
 
 import re
+import os
+import shutil
 import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -93,12 +95,11 @@ def decode_audio_with_ffmpeg(audio_path, start=0.0, duration=None):
 
     This avoids the PyAV (av) package entirely, which caused version errors on some PCs.
     """
-    import shutil
     import subprocess
 
     import numpy as np
 
-    ffmpeg = shutil.which("ffmpeg")
+    ffmpeg = shutil.which("ffmpeg") or _find_winget_ffmpeg()
     if not ffmpeg:
         raise TranscriptionError(
             "FFmpeg was not found. Install it (winget install --id Gyan.FFmpeg -e), "
@@ -117,6 +118,32 @@ def decode_audio_with_ffmpeg(audio_path, start=0.0, duration=None):
         err = proc.stderr.decode("utf-8", errors="replace").strip()
         raise TranscriptionError(f"FFmpeg could not read this file. Details: {err or 'no audio found'}")
     return np.frombuffer(proc.stdout, dtype=np.int16).astype(np.float32) / 32768.0
+
+
+def _find_winget_ffmpeg():
+    """Find Gyan's winget-installed FFmpeg even when its PATH entry is stale/missing."""
+    local_app_data = os.environ.get("LOCALAPPDATA")
+    if not local_app_data:
+        return None
+
+    roots = [
+        Path(local_app_data) / "Microsoft" / "WinGet" / "Links" / "ffmpeg.exe",
+        Path(local_app_data) / "Microsoft" / "WinGet" / "Packages",
+    ]
+    program_files = os.environ.get("ProgramFiles")
+    if program_files:
+        roots.append(Path(program_files) / "WinGet" / "Packages")
+
+    for root in roots:
+        if root.name.lower().endswith(".exe"):
+            if root.is_file():
+                return str(root)
+            continue
+        if root.is_dir():
+            for package in root.glob("Gyan.FFmpeg_*/ffmpeg-*/bin/ffmpeg.exe"):
+                if package.is_file():
+                    return str(package)
+    return None
 
 
 def transcribe_audio(audio_path, language=None, model_size=DEFAULT_MODEL, progress=None, chunk_progress=None, _device="auto") -> TranscriptResult:
