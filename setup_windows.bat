@@ -30,8 +30,8 @@ goto :check_venv
 echo [ERROR] Python 3.9 or newer was not found on this computer.
 where winget >nul 2>&1
 if errorlevel 1 goto :python_manual
-echo Installing Python 3.12 with winget. This may take a few minutes...
-winget install --id Python.Python.3.12 -e --scope user --silent --accept-package-agreements --accept-source-agreements
+echo Installing Python 3.12 for this Windows user with winget. This may take a few minutes...
+winget install --id Python.Python.3.12 -e --scope user --source winget --silent --accept-package-agreements --accept-source-agreements
 echo.
 REM Refresh PATH for this process so a just-installed Python can be used now.
 set "PATH=%LocalAppData%\Programs\Python\Python312;%LocalAppData%\Programs\Python\Python312\Scripts;%PATH%"
@@ -128,19 +128,25 @@ goto :folders
 
 :ensure_tool
 REM %~1 = command name, %~2 = winget package id, %~3 = display name
+call :add_winget_ffmpeg_path
 where %~1 >nul 2>&1
 if not errorlevel 1 (
-    echo %~3 found.
-    goto :eof
+    %~1 -version >nul 2>&1
+    if not errorlevel 1 (
+        echo %~3 found and working.
+        goto :eof
+    )
+    echo [WARNING] %~3 was found on PATH but did not run. Trying a user-scope reinstall...
 )
 where winget >nul 2>&1
 if errorlevel 1 (
-    echo [WARNING] %~3 was not found, and winget is not available on this computer.
-    echo   Install %~3 manually, then run setup_windows.bat again.
-    goto :eof
+    echo [ERROR] WinGet is not available, so %~3 could not be installed automatically.
+    echo   Install WinGet from Microsoft Store or install FFmpeg manually, then retry setup.
+    if "%AUTOMATED%"=="0" pause
+    exit /b 1
 )
-echo %~3 was not found. Installing it with winget. Windows may ask for permission...
-winget install --id %~2 -e --scope user --silent --accept-package-agreements --accept-source-agreements
+echo Installing %~3 for this Windows user with winget. Administrator access should not be needed...
+winget install --id %~2 -e --scope user --source winget --silent --accept-package-agreements --accept-source-agreements
 call :add_winget_ffmpeg_path
 where %~1 >nul 2>&1
 if errorlevel 1 (
@@ -148,9 +154,14 @@ if errorlevel 1 (
     echo   Check the winget messages above, then rerun setup_windows.bat.
     if "%AUTOMATED%"=="0" pause
     exit /b 1
-) else (
-    echo %~3 installed.
 )
+%~1 -version >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] %~3 was found but could not run. Check the winget output and retry setup.
+    if "%AUTOMATED%"=="0" pause
+    exit /b 1
+)
+echo %~3 installed and verified.
 goto :eof
 
 :add_winget_ffmpeg_path
