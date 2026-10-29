@@ -10,7 +10,7 @@ Open **Command Prompt** and paste this command:
 curl.exe -fsSL https://raw.githubusercontent.com/iantolentino/Tagalogtube-Transcribe/main/install.ps1 -o "%TEMP%\tagalogtube-install.ps1" && powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%TEMP%\tagalogtube-install.ps1"
 ```
 
-The installer downloads the app into `%USERPROFILE%\Tagalogtube-Transcribe`, sets up Python dependencies and FFmpeg when needed, then launches the app in your browser at <http://localhost:8501>. Keep the terminal window open while using the app. The first setup and first model download can take a while. The landing page's **USE THE TOOL** button copies this same command.
+The installer downloads the app into `%USERPROFILE%\Tagalogtube-Transcribe`, installs Python and FFmpeg for the current Windows user when needed, sets up Python dependencies, waits for the local server, and then opens <http://localhost:8501> in your browser. Administrator access is not normally required. Keep the terminal window open while using the app. The first setup and first model download can take a while. The landing page's **USE THE TOOL** button copies this same command.
 
 To install manually, download this repository, run `setup_windows.bat` once, then run `run_windows.bat`.
 

@@ -31,7 +31,7 @@ echo [ERROR] Python 3.9 or newer was not found on this computer.
 where winget >nul 2>&1
 if errorlevel 1 goto :python_manual
 echo Installing Python 3.12 with winget. This may take a few minutes...
-winget install --id Python.Python.3.12 -e --silent --accept-package-agreements --accept-source-agreements
+winget install --id Python.Python.3.12 -e --scope user --silent --accept-package-agreements --accept-source-agreements
 echo.
 REM Refresh PATH for this process so a just-installed Python can be used now.
 set "PATH=%LocalAppData%\Programs\Python\Python312;%LocalAppData%\Programs\Python\Python312\Scripts;%PATH%"
@@ -140,7 +140,7 @@ if errorlevel 1 (
     goto :eof
 )
 echo %~3 was not found. Installing it with winget. Windows may ask for permission...
-winget install --id %~2 -e --silent --accept-package-agreements --accept-source-agreements
+winget install --id %~2 -e --scope user --silent --accept-package-agreements --accept-source-agreements
 call :add_winget_ffmpeg_path
 where %~1 >nul 2>&1
 if errorlevel 1 (

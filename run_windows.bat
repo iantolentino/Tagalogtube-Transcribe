@@ -28,17 +28,32 @@ echo   The app opens at http://localhost:8501 in your browser.
 echo   Keep this window open while you use the app.
 echo   To stop the app, close this window or press Ctrl+C.
 echo.
-echo (Waiting for the server to start...)
-timeout /t 6 /nobreak >nul
+echo Starting the local web app and waiting for it to be ready...
+start "TagalogTube Transcriber server" /b "%VENV_PY%" -m streamlit run "%~dp0app.py" --server.address localhost --server.port 8501 --server.headless true --browser.gatherUsageStats false
+set "WAITED=0"
+
+:wait_for_server
+"%VENV_PY%" -c "import socket; s=socket.socket(); s.settimeout(.5); s.connect(('127.0.0.1',8501)); s.close()" >nul 2>&1
+if not errorlevel 1 goto :open_site
+if %WAITED% GEQ 90 goto :server_timeout
+timeout /t 1 /nobreak >nul
+set /a WAITED+=1
+goto :wait_for_server
+
+:open_site
+echo The app is ready. Opening http://localhost:8501
 start "" http://localhost:8501
-"%VENV_PY%" -m streamlit run "%~dp0app.py" --server.address localhost --server.port 8501 --server.headless true --browser.gatherUsageStats false
-if errorlevel 1 (
-    echo.
-    echo [ERROR] The app stopped with an error. Read the messages above.
-    echo If port 8501 is already in use, close the other program that uses it and try again.
-)
+echo.
+echo Keep this window open while you use the app. Press Ctrl+C to stop it.
 pause
 exit /b 0
+
+:server_timeout
+echo.
+echo [ERROR] The app did not start within 90 seconds. Read the server messages above.
+echo If port 8501 is already in use, close the other program using it and try again.
+pause
+exit /b 1
 
 :no_python
 echo [ERROR] Python was not found on this computer.
