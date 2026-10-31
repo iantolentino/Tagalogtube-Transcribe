@@ -8,7 +8,7 @@ Open **Command Prompt** and paste this command:
 
 ```powershell
 curl.exe -fsSL https://raw.githubusercontent.com/iantolentino/Tagalogtube-Transcribe/main/install.ps1 -o "%TEMP%\tagalogtube-install.ps1" && powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%TEMP%\tagalogtube-install.ps1"
-```
+``` 
 
 The installer downloads the app into `%USERPROFILE%\Tagalogtube-Transcribe`, installs Python for the current Windows user with WinGet if needed, installs the app's dependencies (including a bundled FFmpeg executable), waits for the local server, and then opens <http://localhost:8501> in your browser. FFmpeg does not require WinGet or a system PATH change. Administrator access is not normally required. Keep the terminal window open while using the app. The first setup and first model download can take a while. The landing page's **USE THE TOOL** button copies this same command.
 
